@@ -10,14 +10,14 @@
           update_cache: yes
 
       - name: Clone a odoo repository
-        anisble.builtin.git:
+        ansible.builtin.git:
           repo: "{{ odoo_git_repo_path }}"
           dest: /srv/checkout
           clone: yes
           update: no
 
       - name: Install pip3
-        anisble.builtin.apt:
+        ansible.builtin.apt:
           name: "{{ item }}"
           state: present
         with_items:
