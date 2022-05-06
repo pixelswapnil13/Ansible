@@ -12,7 +12,7 @@
       - name: Clone a odoo repository
         ansible.builtin.git:
           repo: "{{ odoo_git_repo_path }}"
-          dest: /home/devops
+          dest: /home/devops/
           clone: yes
           update: no
 
