@@ -1,0 +1,26 @@
+---
+  - name: Install OpenMRS
+    become: yes
+    hosts: all
+    vars:
+      - odoo_git_repo_path: https://github.com/odoo/odoo.git 
+    tasks:
+      - name: update apt repo and cache
+        apt:
+          update_cache: yes
+
+      - name: Clone a odoo repository
+        anisble.builtin.git:
+          repo: "{{ odoo_git_repo_path }}"
+          dest: /srv/checkout
+          clone: yes
+          update: no
+
+      - name: Install pip3
+        anisble.builtin.apt:
+          name: {{ item }}
+          state: present
+        with_items:
+          - python3-pip
+          - postgresql
+          - postgresql-client

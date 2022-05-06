@@ -1,0 +1,117 @@
+---
+  - name: Install nopCommercce
+    become: yes
+    hosts: webserver
+    tasks:
+      - name: update apt repo and cache
+        apt:
+          update_cache: yes
+
+      - name: Download Microsoft key
+        ansible.builtin.get_url:
+          url: "https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb"
+          dest: /home/devops/packages-microsoft-prod.deb
+
+      - name: Install deb key
+        ansible.builtin.shell: dpkg -i packages-microsoft-prod.deb
+
+      - name: Install the transport-https
+        ansible.builtin.apt:
+          name: apt-transport-https
+          update_cache: yes
+          state: present
+
+      - name: install .net
+        ansible.builtin.apt:
+           name: aspnetcore-runtime-6.0
+           update_cache: yes
+           state: present
+
+      - name: Install My sql server
+        ansible.builtin.apt:
+          name: mysql-server
+          state: present
+
+      - name: Install Nginx
+        ansible.builtin.apt:
+          name: nginx
+          state: present
+
+      - name: Start service nginx
+        ansible.builtin.service:
+          name: nginx
+          state: started
+
+      - name: Modifying default config file
+        ansible.builtin.copy:
+          src: default
+          dest: /etc/nginx/sites-available/default
+
+      - name: Create a directory nopCommerce450 in /var/www/
+        ansible.builtin.file:
+          path: /var/www/nopCommerce450
+          state: directory
+          recurse: yes
+          owner: "www-data"
+          group: "www-data"
+          mode: "0755"
+
+      - name: Download nopCommerce
+        ansible.builtin.get_url:
+          url: "https://github.com/nopSolutions/nopCommerce/releases/download/release-4.50.2/nopCommerce_4.50.2_NoSource_linux_x64.zip"
+          dest: "/var/www/nopCommerce450/"
+
+      - name: Install Unzip
+        ansible.builtin.apt:
+          name: unzip
+          state: present
+
+      - name: Unarchive nopCommerce_4.50.2_NoSource_linux_x64.zip
+        ansible.builtin.unarchive:
+          src: /var/www/nopCommerce450/nopCommerce_4.50.2_NoSource_linux_x64.zip
+          dest: /var/www/nopCommerce450/
+          creates: /var/www/nopCommerce450/
+          remote_src: yes
+          owner: www-data
+          group: www-data
+
+      - name: Give permissions to an existing file
+        ansible.builtin.file:
+          path: /var/www/nopCommerce450/Nop.Web.dll
+          owner: www-data
+          group: www-data
+          mode: '0777'
+
+      - name: Create a directory bin
+        ansible.builtin.file:
+          path: /var/www/nopCommerce450/bin
+          state: directory
+          owner: www-data
+          group: www-data
+          mode: '0777'
+
+      - name: Create a directory logs
+        ansible.builtin.file:
+          path: /var/www/nopCommerce450/logs
+          state: directory
+          owner: www-data
+          group: www-data
+          mode: '0755'
+
+      - name: Modifying default config file
+        ansible.builtin.copy:
+          src: "nopCommerce450.service"
+          dest: /etc/systemd/system/
+
+      - name: Start nopCommerce450 Service
+        ansible.builtin.systemd:
+          name: 'nopCommerce450.service'
+          state: started
+          enabled: yes
+
+      - name: reload the daemon, enable and start the nginx service
+        ansible.builtin.systemd:
+          name: 'nginx.service'
+          daemon_reload: yes
+          enabled: yes
+          state: restarted

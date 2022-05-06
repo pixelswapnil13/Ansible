@@ -1,0 +1,108 @@
+---
+  - name: Install tomcat
+    become: yes
+    hosts: appserver
+    vars:
+      - username: tomcat
+      - home_dir: /opt/tomcat
+      - default_shell: /bin/false
+      - tomcat_version: 9.0.62
+      - tomcat_latest: /opt/tomcat/latest
+      - tomcat_bin_directory: /opt/tomcat/latest/bin
+      - tomcat_service_location: /etc/systemd/system/tomcat.service
+      - java_home: /usr/lib/jvm/java-11-openjdk-amd64
+
+    tasks:
+      - name: update apt repo and cache
+        apt:
+          update_cache: yes
+        when: ansible_facts['os_family'] == "Debian"
+      - name: install openjdek 11
+        package:
+          name: "{{ java_package }}"
+          state: present
+      - name: create a user
+        ansible.builtin.user:
+          create_home: yes
+          home: "{{ home_dir }}"
+          name: "{{ username }}"
+          shell: "{{ default_shell }}"
+          state: present
+        when: ansible_facts['os_family'] == "Debian"
+      - name: download tomacat
+        ansible.builtin.get_url:
+          url: "https://www-eu.apache.org/dist/tomcat/tomcat-9/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
+          dest: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        when: ansible_facts['os_family'] == "Debian"
+      - name: Extract tomcat
+        ansible.builtin.unarchive:
+          src: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
+          dest: "{{ home_dir }}"
+          creates: "{{ home_dir }}/apache-tomcat-{{ tomcat_version }}"
+          group: "{{ username }}"
+          owner: "{{ username }}"
+          remote_src: yes
+        when: ansible_facts['os_family'] == "Debian"
+      - name: Create Symoblic link
+        ansible.builtin.file:
+          src: "{{ home_dir }}/apache-tomcat-{{ tomcat_version }}"
+          dest: "{{ tomcat_latest }}"
+          group: "{{ username }}"
+          owner: "{{ username }}"
+          state: link
+        when: ansible_facts['os_family'] == "Debian"
+      - name: Change ownership to tomcat user
+        ansible.builtin.file:
+          path: "{{ home_dir }}"
+          state: directory
+          recurse: yes
+          group: "{{ username }}"
+          owner : "{{ username }}"
+        when: ansible_facts['os_family'] == "Debian"
+      - name: find all the .sh files in the tomcat bin directory
+        find:
+          path: "{{ tomcat_bin_directory }}"
+          pattern: "*.sh"
+        when: ansible_facts['os_family'] == "Debian"
+        register: sh_file_tomcat_bin
+      - name: print files from the previous step
+        debug:
+          var: sh_file_tomcat_bin
+      - name: Giving executable permission to all sh files
+        ansible.builtin.file:
+          path:  '{{ item.path }}'
+          owner: "{{ username }}"
+          group: "{{ username }}"
+          mode: "0755"
+        loop: "{{ sh_file_tomcat_bin.files }}"
+        when: ansible_facts['os_family'] == "Debian"
+      - name: Copy tomact.service file from control node to node-1
+        ansible.builtin.template:
+          src: 'tomcat.service.j2'
+          dest:  "{{ tomcat_service_location }}"
+          owner: "{{ username }}"
+          group: "{{ username }}"
+        when: ansible_facts['os_family'] == "Debian"
+        notify: 
+          - reload the daemon, enable and start the tomcat service
+      - name: force all notified handlers to run at this point, not waiting for normal sync point
+        meta: flush_handlers
+      - name: ensure tomcat service is running
+        ansible.builtin.systemd:
+          name: 'tomcat.service'
+          state: started
+        when: ansible_facts['os_family'] == "Debian"
+    handlers:
+      - name: reload the daemon, enable and start the tomcat service
+        ansible.builtin.systemd:
+          name: 'tomcat.service'
+          daemon_reload: yes
+          enabled: yes
+          state: restarted
+        when: ansible_facts['os_family'] == "Debian"
+          
+
+
+
+
+          
