@@ -62,3 +62,4 @@
       - name: Install specified python requirements  
         pip:
           requirements: /home/devops/odoo/requirements.txt
+          umask: "0022"
