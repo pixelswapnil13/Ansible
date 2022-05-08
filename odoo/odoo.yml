@@ -77,4 +77,4 @@
       - name: Executing the script
         command:
           chdir: /home/devops/odoo  
-          cmd: "python3 odoo-bin --addons-path=addons -d mydb &"
+          cmd: python3 odoo-bin --addons-path=addons -d mydb
