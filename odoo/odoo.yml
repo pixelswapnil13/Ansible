@@ -57,3 +57,10 @@
           - libxcb1-dev
           - libpq-dev
 
+      - name: Install specified python requirements  
+         pip:
+            requirements: /home/devops/odoo/setuptools wheel
+
+       - name: Install specified python requirements  
+         pip:
+            requirements: /home/devops/odoo/requirements.txt
