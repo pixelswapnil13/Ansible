@@ -25,6 +25,29 @@
           - postgresql
           - postgresql-client
 
+      - name: Install dependencies for PostgreSQL
+        apt: 
+          name: "{{ item }}"
+          update_cache: true 
+          state: latest
+        with_items:
+          - python3-dev
+          - libxml2-dev
+          - libxslt1-dev
+          - libldap2-dev
+          - libsasl2-dev
+          - libtiff5-dev 
+          - libjpeg8-dev 
+          - libopenjp2-7-dev 
+          - zlib1g-dev 
+          - libfreetype6-dev 
+          - liblcms2-dev 
+          - libwebp-dev 
+          - libharfbuzz-dev 
+          - libfribidi-dev 
+          - libxcb1-dev
+          - libpq-dev
+
       - name: Create PostgreSQL user
         community.postgresql.postgresql_user:
           name: postgres
