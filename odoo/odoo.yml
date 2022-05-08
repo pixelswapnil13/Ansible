@@ -28,10 +28,12 @@
       - name: create a new PostgreSQL user
         ansible.builtin.command:
           cmd: sudo -u postgres createuser -s $USER
+          ignore_errors: True
 
       - name: create database
         ansible.builtin.command:
           cmd: createdb $USER
+          ignore_errors: True
 
 
       - name: Install dependencies for PostgreSQL
