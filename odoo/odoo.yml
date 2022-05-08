@@ -52,8 +52,6 @@
       - name: Create PostgreSQL user
         community.postgresql.postgresql_user:
           name: devops
-          password: postgres
-          role_attr_flags: CREATEDB
 
       - name: Create a new database with name "postgressql"
         community.postgresql.postgresql_db:
