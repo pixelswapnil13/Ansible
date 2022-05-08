@@ -24,3 +24,14 @@
           - python3-pip
           - postgresql
           - postgresql-client
+
+      - name: Create PostgreSQL user
+        community.postgresql.postgresql_user:
+          name: postgres
+          password: postgres
+          role_attr_flags: CREATEDB,SUPERUSER
+
+      - name: Create a new database with name "postgressql"
+        community.postgresql.postgresql_db:
+          name: postgres
+
