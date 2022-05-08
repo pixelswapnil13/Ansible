@@ -63,3 +63,8 @@
         pip:
           requirements: /home/devops/odoo/requirements.txt
         ignore_errors: True
+
+      - name: Install nodejs
+        ansible.builtin.apt:
+          name: nodejs
+          state: present
