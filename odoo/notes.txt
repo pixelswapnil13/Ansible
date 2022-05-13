@@ -62,6 +62,11 @@ cd odoo/
 $ pip3 install setuptools wheel
 $ pip3 install -r requirements.txt
 
+
+
+- name: Install specified python requirements
+  pip:
+    requirements: /my_app/requirements.txt
 -------------------------------
 install node js
 

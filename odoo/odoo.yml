@@ -73,8 +73,3 @@
         ansible.builtin.apt:
           name: npm
           state: present
-
-      - name: Executing the script
-        command:
-          chdir: /home/devops/odoo  
-          cmd: python3 odoo-bin --addons-path=addons -d mydb
